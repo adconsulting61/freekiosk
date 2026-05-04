@@ -9,7 +9,8 @@ import {
   Image,
   ScrollView,
   Linking,
-  NativeModules
+  NativeModules,
+  DeviceEventEmitter,
 } from 'react-native';
 
 const { HttpServerModule } = NativeModules;
@@ -18,6 +19,8 @@ import { WebView } from 'react-native-webview';
 import type { WebViewErrorEvent, ShouldStartLoadRequest } from 'react-native-webview/lib/WebViewTypes';
 import { useNavigation } from '@react-navigation/native';
 import PrintModule from '../utils/PrintModule';
+import KioskModule from '../utils/KioskModule';
+import RNBrightness from '../utils/BrightnessModule';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 
@@ -561,6 +564,42 @@ const WebViewComponent = forwardRef<WebViewComponentRef, WebViewComponentProps>(
           // User closed PDF viewer, go back to previous page
           if (webViewRef.current) {
             webViewRef.current.goBack();
+          }
+
+        // ── CoreIQ Kiosk remote command bridge ─────────────────────────
+        // Commands dispatched from the SuperIQ admin dashboard are polled
+        // by useKioskCommandPoller (web app) and forwarded here via postMessage
+        // for commands that require native Android capabilities.
+
+        } else if (data.type === 'KIOSK_CMD_BRIGHTNESS') {
+          // Brightness: 0-100 (web) → 0.0-1.0 (Android)
+          const pct = Math.max(0, Math.min(100, Number(data.value ?? 50)));
+          RNBrightness.setBrightness(pct / 100)
+            .catch((err: any) => console.error('[Kiosk] Brightness failed:', err));
+
+        } else if (data.type === 'KIOSK_CMD_SCREEN_ON') {
+          KioskModule.turnScreenOn()
+            .catch((err: any) => console.error('[Kiosk] Screen on failed:', err));
+
+        } else if (data.type === 'KIOSK_CMD_SCREEN_OFF') {
+          KioskModule.turnScreenOff()
+            .catch((err: any) => console.error('[Kiosk] Screen off failed:', err));
+
+        } else if (data.type === 'KIOSK_CMD_SCREENSAVER_ON') {
+          // Emit event that KioskScreen listens to for screensaver activation
+          DeviceEventEmitter.emit('KIOSK_CMD_SCREENSAVER_ON');
+
+        } else if (data.type === 'KIOSK_CMD_SCREENSAVER_OFF') {
+          DeviceEventEmitter.emit('KIOSK_CMD_SCREENSAVER_OFF');
+
+        } else if (data.type === 'KIOSK_CMD_REBOOT') {
+          KioskModule.reboot()
+            .catch((err: any) => console.error('[Kiosk] Reboot failed:', err));
+
+        } else if (data.type === 'KIOSK_CMD_TOAST') {
+          // Trigger Android toast via HttpServerModule (already has showToast)
+          if (HttpServerModule?.showToast) {
+            HttpServerModule.showToast(data.message || '', 'long');
           }
         }
       } catch (e) {
