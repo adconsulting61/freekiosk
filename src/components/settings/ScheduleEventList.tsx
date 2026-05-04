@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - ScheduleEventList Component
+ * CoreIQ Kiosk - ScheduleEventList Component
  * List of scheduled events with add buttons
  */
 

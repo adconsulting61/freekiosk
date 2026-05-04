@@ -1,5 +1,5 @@
 /**
- * FreeKiosk - Media Player Component
+ * CoreIQ Kiosk - Media Player Component
  * Full-screen media player using WebView for video/image playlists
  * Supports: video (MP4, WebM, OGG), images (JPG, PNG, GIF, WebP, SVG)
  * Features: auto-play, loop, shuffle, transitions, optional controls

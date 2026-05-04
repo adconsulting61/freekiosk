@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - TimeInput Component
+ * CoreIQ Kiosk - TimeInput Component
  * Input for time in HH:MM format
  */
 

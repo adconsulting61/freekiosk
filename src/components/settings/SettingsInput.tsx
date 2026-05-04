@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - SettingsInput Component
+ * CoreIQ Kiosk - SettingsInput Component
  * A text input with label and validation
  */
 

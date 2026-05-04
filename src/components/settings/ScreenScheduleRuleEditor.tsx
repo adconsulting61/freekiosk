@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.3 - ScreenScheduleRuleEditor Component
+ * CoreIQ Kiosk - ScreenScheduleRuleEditor Component
  * Modal editor for creating/editing screen schedule rules
  */
 

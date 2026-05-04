@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - SettingsModeSelector Component
+ * CoreIQ Kiosk - SettingsModeSelector Component
  * A segmented control for mode selection (WebView/External App)
  */
 

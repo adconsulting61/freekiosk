@@ -1,5 +1,5 @@
 /**
- * FreeKiosk - Media Player Types
+ * CoreIQ Kiosk - Media Player Types
  * Defines types for the Media Player display mode (videos, images, playlists)
  */
 

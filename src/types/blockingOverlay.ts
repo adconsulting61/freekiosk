@@ -1,5 +1,5 @@
 /**
- * FreeKiosk - Blocking Overlay Types
+ * CoreIQ Kiosk - Blocking Overlay Types
  * 
  * Types for configuring touch-blocking overlay regions
  */

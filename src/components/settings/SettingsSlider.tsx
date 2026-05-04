@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - SettingsSlider Component
+ * CoreIQ Kiosk - SettingsSlider Component
  * A slider with value display and optional presets
  * 
  * Uses local state during drag to avoid StackOverflowError on Android 8.x

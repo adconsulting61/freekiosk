@@ -1,5 +1,5 @@
 /**
- * FreeKiosk - Blocking Overlay Editor Component
+ * CoreIQ Kiosk - Blocking Overlay Editor Component
  * 
  * Editor for a single blocking region
  */

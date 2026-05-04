@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - Settings Screen Export
+ * CoreIQ Kiosk - Settings Screen Export
  */
 
 export { default as SettingsScreenNew } from './SettingsScreenNew';

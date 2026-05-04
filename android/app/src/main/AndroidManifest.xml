@@ -157,7 +157,7 @@
           android:value="background_app_monitor"/>
       </service>
 
-      <!-- Watchdog service: restarts FreeKiosk after OOM kill (#96) -->
+      <!-- Watchdog service: restarts CoreIQ Kiosk after OOM kill (#96) -->
       <service
         android:name=".KioskWatchdogService"
         android:enabled="true"

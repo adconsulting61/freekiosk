@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - DaySelector Component
+ * CoreIQ Kiosk - DaySelector Component
  * Select days of the week for recurring events
  */
 

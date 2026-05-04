@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - SettingsRadioGroup Component
+ * CoreIQ Kiosk - SettingsRadioGroup Component
  * A group of radio buttons for single selection
  */
 

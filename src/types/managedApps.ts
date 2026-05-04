@@ -1,5 +1,5 @@
 /**
- * FreeKiosk - Managed Apps Types
+ * CoreIQ Kiosk - Managed Apps Types
  * 
  * Unified data model for features:
  * - #66: Accessibility whitelist for other apps

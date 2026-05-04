@@ -1,5 +1,5 @@
 /**
- * FreeKiosk - Blocking Overlay Module
+ * CoreIQ Kiosk - Blocking Overlay Module
  * 
  * React Native bridge for native blocking overlay functionality
  */

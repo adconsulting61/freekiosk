@@ -35,7 +35,7 @@ export const MqttSettingsSection: React.FC<MqttSettingsSectionProps> = ({
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [clientId, setClientId] = useState('');
-  const [baseTopic, setBaseTopic] = useState('freekiosk');
+  const [baseTopic, setBaseTopic] = useState('coreiq-kiosk');
   const [discoveryPrefix, setDiscoveryPrefix] = useState('homeassistant');
   const [statusInterval, setStatusInterval] = useState('30');
   const [allowControl, setAllowControl] = useState(true);
@@ -441,7 +441,7 @@ export const MqttSettingsSection: React.FC<MqttSettingsSectionProps> = ({
             label="Base Topic"
             value={baseTopic}
             onChangeText={handleBaseTopicChange}
-            placeholder="freekiosk"
+            placeholder="coreiq-kiosk"
             icon="tag"
             hint="Base MQTT topic for this device"
           />

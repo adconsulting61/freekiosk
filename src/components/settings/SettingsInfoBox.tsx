@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - SettingsInfoBox Component
+ * CoreIQ Kiosk - SettingsInfoBox Component
  * Informational boxes with different variants
  */
 

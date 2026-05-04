@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - OneTimeEventEditor Component
+ * CoreIQ Kiosk - OneTimeEventEditor Component
  * Modal for creating/editing one-time dated events
  */
 

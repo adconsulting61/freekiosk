@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - DateInput Component
+ * CoreIQ Kiosk - DateInput Component
  * Input for date in YYYY-MM-DD format with display formatting
  */
 

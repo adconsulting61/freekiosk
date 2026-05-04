@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - DeviceControlService
+ * CoreIQ Kiosk - DeviceControlService
  * Centralized device control layer - used by REST API and future MDM
  */
 
@@ -171,7 +171,7 @@ class DeviceControlServiceClass {
 
     return {
       ip,
-      hostname: 'freekiosk',
+      hostname: 'coreiq-kiosk',
       uptime: 0, // TODO: implement
       version: this.appVersion,
       isDeviceOwner,

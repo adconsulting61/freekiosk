@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - ScheduleEventCard Component
+ * CoreIQ Kiosk - ScheduleEventCard Component
  * Display card for a scheduled event in the list
  */
 

@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - Theme Export
+ * CoreIQ Kiosk - Theme Export
  * Central export for all theme elements
  */
 

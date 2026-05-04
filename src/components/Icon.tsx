@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - Icon Component
+ * CoreIQ Kiosk - Icon Component
  * Centralized icon system using Material Design Icons
  */
 

@@ -364,8 +364,8 @@ const WebViewComponent = forwardRef<WebViewComponentRef, WebViewComponentProps>(
         default: true,
         lang: navigator.language || 'en-US',
         localService: true,
-        name: 'FreeKiosk Native TTS',
-        voiceURI: 'freekiosk-native'
+        name: 'CoreIQ Kiosk TTS',
+        voiceURI: 'coreiq-kiosk-tts'
       };
 
       var _fkVoicesChangedCb = null;
@@ -554,7 +554,7 @@ const WebViewComponent = forwardRef<WebViewComponentRef, WebViewComponentProps>(
           }
         } else if (data.type === 'PRINT_REQUEST') {
           // Handle print request from window.print()
-          PrintModule.printWebView(data.title || 'FreeKiosk Print', data.paperSize || 'A4')
+          PrintModule.printWebView(data.title || 'CoreIQ Kiosk Print', data.paperSize || 'A4')
             .then(() => console.log('[WebView] Print job started'))
             .catch((err: any) => console.error('[WebView] Print failed:', err));
         } else if (data.type === 'PDF_VIEWER_CLOSE') {
@@ -604,9 +604,9 @@ const WebViewComponent = forwardRef<WebViewComponentRef, WebViewComponentProps>(
     navigation.navigate('Pin');
   };
 
-  const handleOpenGitHub = (): void => {
-    Linking.openURL('https://github.com/rushb-fr/freekiosk').catch(err =>
-      console.error('[FreeKiosk] Failed to open GitHub URL:', err)
+  const handleOpenDocs = (): void => {
+    Linking.openURL('https://coreiq-tx.vercel.app').catch(err =>
+      console.error('[CoreIQ Kiosk] Failed to open URL:', err)
     );
   };
 
@@ -631,24 +631,24 @@ const WebViewComponent = forwardRef<WebViewComponentRef, WebViewComponentProps>(
             </View>
 
             {/* Title */}
-            <Text style={styles.welcomeTitle}>FreeKiosk</Text>
+            <Text style={styles.welcomeTitle}>CoreIQ Kiosk</Text>
             <Text style={styles.welcomeSubtitle}>
-              Professional Kiosk Application
+              Intelligent Retail & Gaming Platform
             </Text>
 
             {/* Features List */}
             <View style={styles.featuresList}>
               <FeatureItem
                 icon="🔒"
-                text="Secure kiosk mode"
+                text="Secure device lockdown"
               />
               <FeatureItem
                 icon="⚡"
-                text="Optimal performance"
+                text="Remote fleet management"
               />
               <FeatureItem
                 icon="🎯"
-                text="100% free & open source"
+                text="Powered by CoreIQ Intelligence"
               />
             </View>
 
@@ -659,18 +659,18 @@ const WebViewComponent = forwardRef<WebViewComponentRef, WebViewComponentProps>(
               activeOpacity={0.8}
             >
               <Text style={styles.setupButtonText}>
-                🚀 Start Configuration
+                🚀 Configure Kiosk
               </Text>
             </TouchableOpacity>
 
-            {/* GitHub Support Button */}
+            {/* Platform Button */}
             <TouchableOpacity
               style={styles.githubButton}
-              onPress={handleOpenGitHub}
+              onPress={handleOpenDocs}
               activeOpacity={0.7}
             >
               <Text style={styles.githubButtonText}>
-                ⭐ Support us on GitHub
+                🌐 Open CoreIQ Platform
               </Text>
             </TouchableOpacity>
 
@@ -683,7 +683,7 @@ const WebViewComponent = forwardRef<WebViewComponentRef, WebViewComponentProps>(
 
             {/* Footer */}
             <Text style={styles.footerText}>
-              Version 1.2.18 • by Rushb
+              CoreIQ Kiosk v1.2.18
             </Text>
           </Animated.View>
         </ScrollView>

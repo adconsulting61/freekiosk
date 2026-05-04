@@ -1,5 +1,5 @@
 /**
- * FreeKiosk - Managed Apps Settings Section
+ * CoreIQ Kiosk - Managed Apps Settings Section
  * 
  * UI component for managing multiple apps in External App mode.
  * Supports features: #66 (Accessibility whitelist), #67 (Multi-App mode), #37 (Background apps)

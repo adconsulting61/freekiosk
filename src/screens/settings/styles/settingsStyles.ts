@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - Settings Styles
+ * CoreIQ Kiosk - Settings Styles
  * Centralized styles for all settings screens
  */
 

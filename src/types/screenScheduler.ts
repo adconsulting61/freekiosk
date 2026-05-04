@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.3 - Screen Sleep Scheduler Types
+ * CoreIQ Kiosk - Screen Sleep Scheduler Types
  * Allows defining automatic screen-off/on times to save energy
  */
 

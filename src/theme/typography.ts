@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - Typography System
+ * CoreIQ Kiosk - Typography System
  * Consistent text styles across the app
  */
 

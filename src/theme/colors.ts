@@ -1,13 +1,13 @@
 /**
- * FreeKiosk v1.2 - Color Palette
+ * CoreIQ Kiosk - Color Palette
  * Centralized color system for consistent UI
  */
 
 export const Colors = {
   // Primary brand colors
-  primary: '#0066cc',
-  primaryLight: '#e3f2fd',
-  primaryDark: '#004999',
+  primary: '#DA291C',
+  primaryLight: '#fce8e7',
+  primaryDark: '#B21E15',
 
   // Secondary accent
   secondary: '#4CAF50',
@@ -57,9 +57,9 @@ export const Colors = {
   shadow: '#000000',
 
   // Tab specific
-  tabActive: '#0066cc',
+  tabActive: '#DA291C',
   tabInactive: '#999999',
-  tabIndicator: '#0066cc',
+  tabIndicator: '#DA291C',
 
   // Card backgrounds by type
   cardDefault: '#ffffff',

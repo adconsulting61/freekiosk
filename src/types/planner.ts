@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - URL Planner Types
+ * CoreIQ Kiosk - URL Planner Types
  * Hybrid scheduling: recurring weekly + one-time dated events
  */
 

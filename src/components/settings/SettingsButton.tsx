@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - SettingsButton Component
+ * CoreIQ Kiosk - SettingsButton Component
  * Styled buttons for actions
  */
 

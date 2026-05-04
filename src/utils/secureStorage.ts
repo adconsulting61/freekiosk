@@ -6,10 +6,10 @@ import { StorageService } from './storage';
 const { KioskModule } = NativeModules;
 
 // Constants
-const PIN_SERVICE = 'freekiosk_pin';
-const API_KEY_SERVICE = 'freekiosk_api_key';
-const MQTT_PASSWORD_SERVICE = 'freekiosk_mqtt_password';
-const BASIC_AUTH_PASSWORD_SERVICE = 'freekiosk_basic_auth_password';
+const PIN_SERVICE = 'coreiq_kiosk_pin';
+const API_KEY_SERVICE = 'coreiq_kiosk_api_key';
+const MQTT_PASSWORD_SERVICE = 'coreiq_kiosk_mqtt_password';
+const BASIC_AUTH_PASSWORD_SERVICE = 'coreiq_kiosk_basic_auth_password';
 const LEGACY_API_KEY = '@kiosk_rest_api_key'; // Legacy AsyncStorage key for migration
 const ATTEMPTS_KEY = '@kiosk_pin_attempts';
 const LOCKOUT_KEY = '@kiosk_pin_lockout';

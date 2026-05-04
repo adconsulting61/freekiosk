@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - SettingsSwitch Component
+ * CoreIQ Kiosk - SettingsSwitch Component
  * A toggle switch with label and hint text
  */
 

@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - URL List Editor Component
+ * CoreIQ Kiosk - URL List Editor Component
  * Manage a list of URLs for rotation
  */
 

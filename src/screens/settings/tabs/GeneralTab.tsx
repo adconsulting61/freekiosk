@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - General Tab
+ * CoreIQ Kiosk - General Tab
  * Display mode, URL/App selection, PIN configuration
  */
 
@@ -554,7 +554,7 @@ const GeneralTab: React.FC<GeneralTabProps> = ({
                 onChangeText={onUrlChange}
                 placeholder="https://example.com"
                 keyboardType="url"
-                hint="Example: https://www.freekiosk.app"
+                hint="Example: https://coreiq-tx.vercel.app/player-iq"
               />
 
               {url.trim().toLowerCase().startsWith('http://') && (
@@ -595,7 +595,7 @@ const GeneralTab: React.FC<GeneralTabProps> = ({
           )}
           <SettingsInfoBox variant="info">
             <Text style={styles.infoText}>
-              When a website returns a 401 Unauthorized response, FreeKiosk will automatically reply with these credentials. Leave username empty to disable.
+              When a website returns a 401 Unauthorized response, CoreIQ Kiosk will automatically reply with these credentials. Leave username empty to disable.
             </Text>
           </SettingsInfoBox>
         </SettingsSection>
@@ -797,8 +797,8 @@ const GeneralTab: React.FC<GeneralTabProps> = ({
                 </Text>
                 <Text style={styles.permissionHint}>
                   {hasUsageStatsPermission
-                    ? "Auto-relaunch monitoring is active. FreeKiosk can detect when the external app closes."
-                    : "Required for auto-relaunch. Without this, FreeKiosk cannot detect when the external app closes or crashes."}
+                    ? "Auto-relaunch monitoring is active. CoreIQ Kiosk can detect when the external app closes."
+                    : "Required for auto-relaunch. Without this, CoreIQ Kiosk cannot detect when the external app closes or crashes."}
                 </Text>
               </View>
             </View>

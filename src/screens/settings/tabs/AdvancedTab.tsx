@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - Advanced Tab
+ * CoreIQ Kiosk - Advanced Tab
  * SSL Certificates, Updates, Reset, Device Owner, REST API
  */
 
@@ -118,7 +118,7 @@ const AdvancedTab: React.FC<AdvancedTabProps> = ({
         Alert.alert(
           'Permission Required',
           'To auto-enable the Accessibility Service, the WRITE_SECURE_SETTINGS permission must be granted via ADB (one-time setup):\n\n' +
-          'adb shell pm grant com.freekiosk android.permission.WRITE_SECURE_SETTINGS\n\n' +
+          'adb shell pm grant com.coreiq.kiosk android.permission.WRITE_SECURE_SETTINGS\n\n' +
           'Alternatively, tap "Open Accessibility Settings" below to enable it manually.',
           [{ text: 'OK' }],
         );
@@ -253,8 +253,8 @@ const AdvancedTab: React.FC<AdvancedTabProps> = ({
 
         <SettingsInfoBox variant="info" title="ℹ️ Why is this needed?">
           <Text style={styles.infoText}>
-            The Accessibility Service allows FreeKiosk to send keyboard input (remote control, text input) to external apps.{'\n\n'}
-            Without it, keyboard emulation only works inside FreeKiosk's own WebView.
+            The Accessibility Service allows CoreIQ Kiosk to send keyboard input (remote control, text input) to external apps.{'\n\n'}
+            Without it, keyboard emulation only works inside CoreIQ Kiosk's own WebView.
           </Text>
         </SettingsInfoBox>
 
@@ -277,7 +277,7 @@ const AdvancedTab: React.FC<AdvancedTabProps> = ({
             <Text style={styles.hint}>
               {isDeviceOwner
                 ? 'Device Owner mode can enable the service automatically if the WRITE_SECURE_SETTINGS permission has been granted via ADB. Otherwise, enable it manually in Android settings.'
-                : 'Enable "FreeKiosk" in Settings → Accessibility → Installed Services.'}
+                : 'Enable "CoreIQ Kiosk" in Settings → Accessibility → Installed Services.'}
             </Text>
           </>
         )}
@@ -312,7 +312,7 @@ const AdvancedTab: React.FC<AdvancedTabProps> = ({
           <SettingsInfoBox variant="info" title="🔒 Kiosk Mode Active">
             <Text style={styles.infoText}>
               Kiosk mode will be temporarily paused to open Android settings.{' '}
-              It will automatically re-engage when you return to FreeKiosk.
+              It will automatically re-engage when you return to CoreIQ Kiosk.
             </Text>
           </SettingsInfoBox>
         )}
@@ -392,7 +392,7 @@ const AdvancedTab: React.FC<AdvancedTabProps> = ({
       
       {/* Version footer */}
       <Text style={styles.versionFooter}>
-        FreeKiosk v{currentVersion}
+        CoreIQ Kiosk v{currentVersion}
       </Text>
     </View>
   );

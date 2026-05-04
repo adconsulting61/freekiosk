@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - SettingsSection Component
+ * CoreIQ Kiosk - SettingsSection Component
  * A card-style container for grouping related settings
  */
 

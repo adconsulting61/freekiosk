@@ -93,9 +93,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.freekiosk"
+    namespace "com.coreiq.kiosk"
     defaultConfig {
-        applicationId "com.freekiosk"
+        applicationId "com.coreiq.kiosk"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 38

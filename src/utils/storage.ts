@@ -2188,10 +2188,10 @@ export const StorageService = {
   getMqttBaseTopic: async (): Promise<string> => {
     try {
       const value = await AsyncStorage.getItem(KEYS.MQTT_BASE_TOPIC);
-      return value || 'freekiosk';
+      return value || 'coreiq-kiosk';
     } catch (error) {
       console.error('Error getting MQTT base topic:', error);
-      return 'freekiosk';
+      return 'coreiq-kiosk';
     }
   },
 

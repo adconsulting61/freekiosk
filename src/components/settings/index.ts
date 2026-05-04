@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.3 - Settings Components Export
+ * CoreIQ Kiosk - Settings Components Export
  */
 
 export { default as SettingsSection } from './SettingsSection';

@@ -1,5 +1,5 @@
 /**
- * FreeKiosk - File Picker Module (TypeScript wrapper)
+ * CoreIQ Kiosk - File Picker Module (TypeScript wrapper)
  * Native Android file picker for selecting videos and images from the device.
  * Files are copied to the app's internal storage for reliable WebView access.
  */

@@ -1,5 +1,5 @@
 /**
- * FreeKiosk - BackupService
+ * CoreIQ Kiosk - BackupService
  * Handles backup and restore of app configuration
  */
 
@@ -157,7 +157,7 @@ async function requestStoragePermission(): Promise<boolean> {
         PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
         {
           title: 'Storage Permission',
-          message: 'FreeKiosk needs storage access to save and load backup files.',
+          message: 'CoreIQ Kiosk needs storage access to save and load backup files.',
           buttonNeutral: 'Ask Me Later',
           buttonNegative: 'Cancel',
           buttonPositive: 'OK',
@@ -168,7 +168,7 @@ async function requestStoragePermission(): Promise<boolean> {
         PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
         {
           title: 'Storage Permission',
-          message: 'FreeKiosk needs storage access to save and load backup files.',
+          message: 'CoreIQ Kiosk needs storage access to save and load backup files.',
           buttonNeutral: 'Ask Me Later',
           buttonNegative: 'Cancel',
           buttonPositive: 'OK',
@@ -202,7 +202,7 @@ function getBackupDirectory(): string {
 function generateBackupFilename(): string {
   const date = new Date();
   const timestamp = date.toISOString().replace(/[:.]/g, '-').slice(0, 19);
-  return `freekiosk-backup-${timestamp}.json`;
+  return `coreiq-kiosk-backup-${timestamp}.json`;
 }
 
 /**
@@ -302,7 +302,7 @@ export async function listBackupFiles(): Promise<{ name: string; path: string; d
 
     const files = await RNFS.readDir(directory);
     const backupFiles = files
-      .filter(file => file.name.startsWith('freekiosk-backup-') && file.name.endsWith('.json'))
+      .filter(file => file.name.startsWith('coreiq-kiosk-backup-') && file.name.endsWith('.json'))
       .map(file => ({
         name: file.name,
         path: file.path,

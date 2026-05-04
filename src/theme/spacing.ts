@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - Spacing System
+ * CoreIQ Kiosk - Spacing System
  * Consistent spacing values based on 4px grid
  */
 

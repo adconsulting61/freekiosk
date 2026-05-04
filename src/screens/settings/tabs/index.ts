@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - Settings Tabs Export
+ * CoreIQ Kiosk - Settings Tabs Export
  */
 
 export { default as GeneralTab } from './GeneralTab';

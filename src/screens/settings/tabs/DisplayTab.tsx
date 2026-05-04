@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - Display Tab
+ * CoreIQ Kiosk - Display Tab
  * Brightness, Status Bar, Keyboard settings
  */
 
@@ -230,7 +230,7 @@ const DisplayTab: React.FC<DisplayTabProps> = ({
           <SettingsSwitch
             label="App Brightness Control"
             hint={brightnessManagementEnabled
-              ? "FreeKiosk manages screen brightness"
+              ? "CoreIQ Kiosk manages screen brightness"
               : "System manages brightness (Tasker, Android settings, etc.)"}
             value={brightnessManagementEnabled}
             onValueChange={onBrightnessManagementEnabledChange}
@@ -238,7 +238,7 @@ const DisplayTab: React.FC<DisplayTabProps> = ({
           {!brightnessManagementEnabled && (
             <SettingsInfoBox variant="info">
               <Text style={styles.infoText}>
-                💡 Brightness is managed by the system. External tools like Tasker can control brightness without interference from FreeKiosk.
+                💡 Brightness is managed by the system. External tools like Tasker can control brightness without interference from CoreIQ Kiosk.
               </Text>
             </SettingsInfoBox>
           )}
@@ -604,7 +604,7 @@ const DisplayTab: React.FC<DisplayTabProps> = ({
                   • After {inactivityDelay || '10'} minute(s) without interaction, the screensaver activates{`
 `}
                   {displayMode === 'external_app'
-                    ? `• FreeKiosk comes to the foreground to show the screensaver; the external app resumes on wake
+                    ? `• CoreIQ Kiosk comes to the foreground to show the screensaver; the external app resumes on wake
 `
                     : ''}
                   • Touch the screen to wake the device{`

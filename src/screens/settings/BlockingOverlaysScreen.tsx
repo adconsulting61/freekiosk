@@ -1,5 +1,5 @@
 /**
- * FreeKiosk - Blocking Overlays Settings Screen
+ * CoreIQ Kiosk - Blocking Overlays Settings Screen
  * 
  * Configure touch-blocking regions for external apps
  */

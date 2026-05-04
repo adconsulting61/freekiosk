@@ -224,7 +224,7 @@ const ExternalAppOverlay: React.FC<ExternalAppOverlayProps> = ({
             style={styles.miniLogo}
             resizeMode="contain"
           />
-          <Text style={styles.multiAppTitle}>FreeKiosk</Text>
+          <Text style={styles.multiAppTitle}>CoreIQ Kiosk</Text>
         </View>
         <FlatList
           data={homeScreenApps}
@@ -292,7 +292,7 @@ const ExternalAppOverlay: React.FC<ExternalAppOverlayProps> = ({
           </View>
 
           {/* Title */}
-          <Text style={styles.title}>FreeKiosk</Text>
+          <Text style={styles.title}>CoreIQ Kiosk</Text>
           <Text style={styles.subtitle}>External App Mode</Text>
 
           {/* Status Message */}
@@ -319,7 +319,7 @@ const ExternalAppOverlay: React.FC<ExternalAppOverlayProps> = ({
                 <Text style={styles.warningIcon}>🧪</Text>
                 <Text style={styles.warningTitle}>Test Mode Active</Text>
                 <Text style={styles.warningText}>
-                  You can use the Android back button to return to FreeKiosk.
+                  You can use the Android back button to return to CoreIQ Kiosk.
                 </Text>
               </View>
             </View>

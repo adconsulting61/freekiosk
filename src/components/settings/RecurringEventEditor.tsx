@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - RecurringEventEditor Component
+ * CoreIQ Kiosk - RecurringEventEditor Component
  * Modal for creating/editing recurring scheduled events
  */
 

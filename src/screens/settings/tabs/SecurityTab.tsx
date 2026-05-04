@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.2 - Security Tab
+ * CoreIQ Kiosk - Security Tab
  * Lock mode, Auto-launch, External app behavior
  */
 
@@ -148,7 +148,7 @@ const SecurityTab: React.FC<SecurityTabProps> = ({
         {kioskEnabled && (displayMode === 'webview' || displayMode === 'media_player') && !isDeviceOwner && (
           <SettingsInfoBox variant="warning">
             <Text style={styles.infoText}>
-              ⚠️ Without Device Owner, users can exit via Back + Recent Apps gesture. Set FreeKiosk as Device Owner for complete lockdown.
+              ⚠️ Without Device Owner, users can exit via Back + Recent Apps gesture. Set CoreIQ Kiosk as Device Owner for complete lockdown.
             </Text>
           </SettingsInfoBox>
         )}
@@ -201,7 +201,7 @@ const SecurityTab: React.FC<SecurityTabProps> = ({
       <SettingsSection title="Auto Launch" icon="rocket-launch">
         <SettingsSwitch
           label="Launch on Boot"
-          hint="Automatically launch FreeKiosk when the device starts"
+          hint="Automatically launch CoreIQ Kiosk when the device starts"
           value={autoLaunchEnabled}
           onValueChange={onAutoLaunchChange}
         />

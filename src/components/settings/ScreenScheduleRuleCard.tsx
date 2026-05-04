@@ -1,5 +1,5 @@
 /**
- * FreeKiosk v1.3 - ScreenScheduleRuleCard Component
+ * CoreIQ Kiosk - ScreenScheduleRuleCard Component
  * Display a single screen schedule rule with edit/delete/toggle
  */
 
