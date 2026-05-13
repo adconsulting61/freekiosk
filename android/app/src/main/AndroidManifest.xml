@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"/>
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -167,6 +168,13 @@
           android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
           android:value="kiosk_watchdog"/>
       </service>
+
+      <!-- Remote screen monitoring stream service -->
+      <service
+        android:name=".ScreenStreamService"
+        android:enabled="true"
+        android:exported="false"
+        android:foregroundServiceType="mediaProjection"/>
 
       <!-- Receiver for silent installation results (disabled in Play Store builds) -->
       <receiver

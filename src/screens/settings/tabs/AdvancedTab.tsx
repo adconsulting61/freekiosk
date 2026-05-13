@@ -9,6 +9,8 @@ import {
   SettingsSection,
   SettingsButton,
   SettingsInfoBox,
+  SettingsSwitch,
+  SettingsInput,
   BackupRestoreSection,
 } from '../../../components/settings';
 import { ApiSettingsSection } from '../../../components/ApiSettingsSection';
@@ -49,6 +51,16 @@ interface AdvancedTabProps {
   
   // Backup/Restore
   onRestoreComplete?: () => void;
+
+  // Remote monitoring
+  remoteMonitoringEnabled: boolean;
+  onRemoteMonitoringEnabledChange: (value: boolean) => void;
+  remoteRelayUrl: string;
+  onRemoteRelayUrlChange: (value: string) => void;
+  remoteDeviceId: string;
+  remoteStreamStatus: string;
+  onStartStreaming: () => void;
+  onStopStreaming: () => void;
 }
 
 const AdvancedTab: React.FC<AdvancedTabProps> = ({
@@ -71,6 +83,14 @@ const AdvancedTab: React.FC<AdvancedTabProps> = ({
   onRemoveDeviceOwner,
   kioskEnabled,
   onRestoreComplete,
+  remoteMonitoringEnabled,
+  onRemoteMonitoringEnabledChange,
+  remoteRelayUrl,
+  onRemoteRelayUrlChange,
+  remoteDeviceId,
+  remoteStreamStatus,
+  onStartStreaming,
+  onStopStreaming,
 }) => {
   const [accessibilityEnabled, setAccessibilityEnabled] = useState(false);
   const [accessibilityRunning, setAccessibilityRunning] = useState(false);
@@ -360,6 +380,47 @@ const AdvancedTab: React.FC<AdvancedTabProps> = ({
             <Text style={styles.shortcutText}>📱 Apps</Text>
           </TouchableOpacity>
         </View>
+      </SettingsSection>
+
+      {/* Remote Monitoring */}
+      <SettingsSection title="Remote Monitoring" icon="monitor-eye">
+        <SettingsSwitch
+          label="Enable Remote Screen Monitoring"
+          hint="Stream live screen to admin dashboard via relay server. Requires screen capture permission on first use."
+          value={remoteMonitoringEnabled}
+          onValueChange={onRemoteMonitoringEnabledChange}
+        />
+        {remoteMonitoringEnabled && (
+          <>
+            <SettingsInput
+              label="Relay Server URL"
+              value={remoteRelayUrl}
+              onChangeText={onRemoteRelayUrlChange}
+              placeholder="ws://your-server:3000"
+              keyboardType="url"
+              autoCapitalize="none"
+              hint="WebSocket relay server address (ws:// or wss://)"
+            />
+            <SettingsInfoBox>
+              Device ID: {remoteDeviceId}
+            </SettingsInfoBox>
+            {remoteStreamStatus === 'connected' ? (
+              <SettingsButton
+                title="Stop Streaming"
+                icon="stop-circle"
+                variant="warning"
+                onPress={onStopStreaming}
+              />
+            ) : (
+              <SettingsButton
+                title={remoteStreamStatus === 'connecting' ? 'Connecting…' : 'Start Streaming'}
+                icon="cast"
+                variant="primary"
+                onPress={onStartStreaming}
+              />
+            )}
+          </>
+        )}
       </SettingsSection>
 
       {/* Actions */}

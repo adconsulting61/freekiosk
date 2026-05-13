@@ -33,6 +33,7 @@ class MainApplication : Application(), ReactApplication {
           add(PrintPackage())
           add(AccessibilityPackage())
           add(FilePickerPackage())
+          add(ScreenStreamPackage())
         },
     )
   }

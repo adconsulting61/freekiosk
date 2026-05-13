@@ -7,6 +7,7 @@ const { KioskModule } = NativeModules;
 
 // Constants
 const PIN_SERVICE = 'coreiq_kiosk_pin';
+const LOCATION_PIN_SERVICE = 'coreiq_kiosk_location_pin';
 const API_KEY_SERVICE = 'coreiq_kiosk_api_key';
 const MQTT_PASSWORD_SERVICE = 'coreiq_kiosk_mqtt_password';
 const BASIC_AUTH_PASSWORD_SERVICE = 'coreiq_kiosk_basic_auth_password';
@@ -487,6 +488,130 @@ export async function clearSecurePin(): Promise<void> {
     }
   } catch (error) {
     console.error('[SecureStorage] Error clearing PIN:', error);
+  }
+}
+
+// ============================================
+// LOCATION PIN SECURE STORAGE
+// Separate PIN for location owners — grants limited access (WiFi, brightness, restart)
+// ============================================
+
+/**
+ * Internal helper: verify inputPin against a stored PBKDF2 hash in Keychain.
+ * Returns true/false with no side effects (no attempt tracking).
+ */
+async function checkPinHash(inputPin: string, service: string): Promise<boolean> {
+  try {
+    const credentials = await Keychain.getGenericPassword({ service });
+    if (!credentials) return false;
+    const pinData = JSON.parse(credentials.password);
+    const { hash: storedHash, salt: saltHex } = pinData;
+    const salt = hexToBytes(saltHex);
+    const inputHash = await hashPin(inputPin, salt);
+    return inputHash === storedHash;
+  } catch {
+    return false;
+  }
+}
+
+export async function saveSecureLocationPin(pin: string): Promise<boolean> {
+  try {
+    const salt = generateSalt();
+    const hashedPin = await hashPin(pin, salt);
+    await Keychain.setGenericPassword(
+      'location_pin',
+      JSON.stringify({ hash: hashedPin, salt: bytesToHex(salt) }),
+      { service: LOCATION_PIN_SERVICE, accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED }
+    );
+    return true;
+  } catch (error) {
+    console.error('[SecureStorage] Error saving location PIN:', error);
+    return false;
+  }
+}
+
+export async function hasSecureLocationPin(): Promise<boolean> {
+  try {
+    const credentials = await Keychain.getGenericPassword({ service: LOCATION_PIN_SERVICE });
+    return !!credentials;
+  } catch {
+    return false;
+  }
+}
+
+export async function clearSecureLocationPin(): Promise<void> {
+  try {
+    await Keychain.resetGenericPassword({ service: LOCATION_PIN_SERVICE });
+  } catch (error) {
+    console.error('[SecureStorage] Error clearing location PIN:', error);
+  }
+}
+
+/**
+ * Verify inputPin against admin PIN first, then location PIN.
+ * Uses shared attempt/lockout counter.
+ * Returns role: 'admin' | 'location' on success.
+ */
+export async function verifyAnyPin(inputPin: string): Promise<{
+  success: boolean;
+  role?: 'admin' | 'location';
+  attemptsRemaining?: number;
+  lockoutTimeRemaining?: number;
+  message?: string;
+}> {
+  try {
+    const lockoutStatus = await checkLockout();
+    if (lockoutStatus.isLockedOut) {
+      return {
+        success: false,
+        lockoutTimeRemaining: lockoutStatus.timeRemaining ?? undefined,
+        message: `Too many failed attempts. Try again in ${Math.ceil((lockoutStatus.timeRemaining || 0) / 60000)} minutes.`,
+      };
+    }
+
+    // Try admin PIN
+    const adminCredentials = await Keychain.getGenericPassword({ service: PIN_SERVICE });
+    if (adminCredentials) {
+      const isAdmin = await checkPinHash(inputPin, PIN_SERVICE);
+      if (isAdmin) {
+        await resetPinAttempts();
+        return { success: true, role: 'admin' };
+      }
+    } else {
+      // Fallback: legacy plaintext or default 1234
+      const legacyPin = await checkLegacyPlaintextPin();
+      if (legacyPin ? inputPin === legacyPin : inputPin === '1234') {
+        await resetPinAttempts();
+        return { success: true, role: 'admin' };
+      }
+    }
+
+    // Try location PIN
+    const isLocation = await checkPinHash(inputPin, LOCATION_PIN_SERVICE);
+    if (isLocation) {
+      await resetPinAttempts();
+      return { success: true, role: 'location' };
+    }
+
+    // Neither matched
+    await recordFailedAttempt();
+    const maxAttempts = await getMaxAttempts();
+    const attempts = await getPinAttempts();
+    if (attempts.count >= maxAttempts) {
+      return {
+        success: false,
+        lockoutTimeRemaining: LOCKOUT_DURATION,
+        message: `Too many failed attempts. Locked for 15 minutes.`,
+      };
+    }
+    return {
+      success: false,
+      attemptsRemaining: maxAttempts - attempts.count,
+      message: 'Incorrect PIN',
+    };
+  } catch (error) {
+    console.error('[SecureStorage] Error in verifyAnyPin:', error);
+    return { success: false, message: 'Error verifying PIN' };
   }
 }
 

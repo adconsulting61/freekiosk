@@ -20,7 +20,7 @@ import {
 import CookieManager from '@react-native-cookies/cookies';
 import { Camera } from 'react-native-vision-camera';
 import { StorageService } from '../../utils/storage';
-import { saveSecurePin, hasSecurePin, clearSecurePin, saveSecureBasicAuthPassword, getSecureBasicAuthPassword } from '../../utils/secureStorage';
+import { saveSecurePin, hasSecurePin, clearSecurePin, saveSecureBasicAuthPassword, getSecureBasicAuthPassword, saveSecureLocationPin, hasSecureLocationPin, clearSecureLocationPin } from '../../utils/secureStorage';
 import CertificateModuleTyped, { CertificateInfo } from '../../utils/CertificateModule';
 import AppLauncherModule, { AppInfo } from '../../utils/AppLauncherModule';
 import OverlayPermissionModule from '../../utils/OverlayPermissionModule';
@@ -29,6 +29,8 @@ import UpdateModule, { ENABLE_SELF_UPDATE } from '../../utils/UpdateModule';
 import AutoBrightnessModule from '../../utils/AutoBrightnessModule';
 import { httpServer } from '../../utils/HttpServerModule';
 import { hasSettingsAccess, revokeSettingsAccess } from '../../utils/authState';
+import ScreenStreamModule from '../../utils/ScreenStreamModule';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/AppNavigator';
 
@@ -77,6 +79,14 @@ const SettingsScreenNew: React.FC<SettingsScreenProps> = ({ navigation }) => {
   const [url, setUrl] = useState<string>('');
   const [pin, setPin] = useState<string>('');
   const [isPinConfigured, setIsPinConfigured] = useState<boolean>(false);
+  const [locationPin, setLocationPin] = useState<string>('');
+  const [isLocationPinConfigured, setIsLocationPinConfigured] = useState<boolean>(false);
+
+  // Remote monitoring
+  const [remoteMonitoringEnabled, setRemoteMonitoringEnabled] = useState<boolean>(false);
+  const [remoteRelayUrl, setRemoteRelayUrl] = useState<string>('');
+  const [remoteDeviceId, setRemoteDeviceId] = useState<string>('');
+  const [remoteStreamStatus, setRemoteStreamStatus] = useState<string>('idle');
   const [pinMode, setPinMode] = useState<'numeric' | 'alphanumeric'>('numeric');
   const [initialPinMode, setInitialPinMode] = useState<'numeric' | 'alphanumeric'>('numeric');
   const [pinModeChanged, setPinModeChanged] = useState<boolean>(false);
@@ -324,8 +334,16 @@ const SettingsScreenNew: React.FC<SettingsScreenProps> = ({ navigation }) => {
     return () => subscription.remove();
   }, [fetchCamera2Fallback]);
 
+  // Subscribe to stream status events from native module
+  useEffect(() => {
+    const sub = ScreenStreamModule.onStatusChange((status) => {
+      setRemoteStreamStatus(status);
+    });
+    return () => sub.remove();
+  }, []);
+
   // ============ LOAD FUNCTIONS ============
-  
+
   const checkLightSensor = async () => {
     try {
       const sensorAvailable = await AutoBrightnessModule.hasLightSensor();
@@ -425,8 +443,22 @@ const SettingsScreenNew: React.FC<SettingsScreenProps> = ({ navigation }) => {
     const savedScreensaverVideoItems = await StorageService.getScreensaverVideoItems<MediaItem>();
     const savedScreensaverVideoLoop = await StorageService.getScreensaverVideoLoop();
     const hasPinConfigured = await hasSecurePin();
-    
+    const hasLocationPinConfigured = await hasSecureLocationPin();
+
+    // Remote monitoring
+    const savedRemoteEnabled = await AsyncStorage.getItem('@remote_monitoring_enabled');
+    const savedRelayUrl = await AsyncStorage.getItem('@remote_relay_url') ?? '';
+    let savedDeviceId = await AsyncStorage.getItem('@remote_device_id');
+    if (!savedDeviceId) {
+      savedDeviceId = 'kiosk-' + Math.random().toString(36).slice(2, 10);
+      await AsyncStorage.setItem('@remote_device_id', savedDeviceId);
+    }
+    setRemoteMonitoringEnabled(savedRemoteEnabled === 'true');
+    setRemoteRelayUrl(savedRelayUrl);
+    setRemoteDeviceId(savedDeviceId);
+
     setIsPinConfigured(hasPinConfigured);
+    setIsLocationPinConfigured(hasLocationPinConfigured);
     if (savedUrl) setUrl(savedUrl);
     if (hasPinConfigured) setPin('');
 
@@ -1182,6 +1214,12 @@ const SettingsScreenNew: React.FC<SettingsScreenProps> = ({ navigation }) => {
       setPinModeChanged(false);
     }
 
+    if (locationPin && locationPin.length >= 4) {
+      await saveSecureLocationPin(locationPin);
+      setIsLocationPinConfigured(true);
+      setLocationPin('');
+    }
+
     await StorageService.savePinMaxAttempts(pinMaxAttemptsNumber);
     await StorageService.savePinMode(pinMode);
 
@@ -1423,12 +1461,15 @@ const SettingsScreenNew: React.FC<SettingsScreenProps> = ({ navigation }) => {
               await StorageService.clearAll();
               await CertificateModuleTyped.clearAcceptedCertificates();
               await clearSecurePin();
+              await clearSecureLocationPin();
               await CookieManager.clearAll();
 
               // Reset all state
               setUrl('');
               setPin('');
+              setLocationPin('');
               setIsPinConfigured(false);
+              setIsLocationPinConfigured(false);
               setPinMode('numeric');
               setInitialPinMode('numeric');
               setPinModeChanged(false);
@@ -1554,6 +1595,7 @@ const SettingsScreenNew: React.FC<SettingsScreenProps> = ({ navigation }) => {
               await StorageService.clearAll();
               await CertificateModuleTyped.clearAcceptedCertificates();
               await clearSecurePin();
+              await clearSecureLocationPin();
               await CookieManager.clearAll();
 
               setIsDeviceOwner(false);
@@ -1571,6 +1613,41 @@ const SettingsScreenNew: React.FC<SettingsScreenProps> = ({ navigation }) => {
         },
       ],
     );
+  };
+
+  const handleRemoteMonitoringToggle = async (enabled: boolean): Promise<void> => {
+    setRemoteMonitoringEnabled(enabled);
+    await AsyncStorage.setItem('@remote_monitoring_enabled', String(enabled));
+    if (!enabled) {
+      await ScreenStreamModule.stopStreaming();
+      setRemoteStreamStatus('idle');
+    }
+  };
+
+  const handleStartStreaming = async (): Promise<void> => {
+    if (!remoteRelayUrl.trim()) {
+      Alert.alert('Error', 'Enter a relay server URL first.');
+      return;
+    }
+    await AsyncStorage.setItem('@remote_monitoring_enabled', 'true');
+    await AsyncStorage.setItem('@remote_relay_url', remoteRelayUrl.trim());
+    setRemoteStreamStatus('connecting');
+    try {
+      await ScreenStreamModule.startStreaming({
+        relayUrl: remoteRelayUrl.trim(),
+        deviceId: remoteDeviceId,
+        quality: 40,
+        fps: 2,
+      });
+    } catch (e: any) {
+      setRemoteStreamStatus('idle');
+      Alert.alert('Error', e?.message ?? 'Could not start streaming.');
+    }
+  };
+
+  const handleStopStreaming = async (): Promise<void> => {
+    await ScreenStreamModule.stopStreaming();
+    setRemoteStreamStatus('idle');
   };
 
   const handleRemoveCertificate = async (fingerprint: string, url: string): Promise<void> => {
@@ -1625,6 +1702,9 @@ const SettingsScreenNew: React.FC<SettingsScreenProps> = ({ navigation }) => {
             pin={pin}
             onPinChange={setPin}
             isPinConfigured={isPinConfigured}
+            locationPin={locationPin}
+            onLocationPinChange={setLocationPin}
+            isLocationPinConfigured={isLocationPinConfigured}
             pinModeChanged={pinModeChanged}
             pinMode={pinMode}
             onPinModeChange={(newMode) => {
@@ -1901,6 +1981,14 @@ const SettingsScreenNew: React.FC<SettingsScreenProps> = ({ navigation }) => {
             onRemoveDeviceOwner={handleRemoveDeviceOwner}
             kioskEnabled={kioskEnabled}
             onRestoreComplete={loadSettings}
+            remoteMonitoringEnabled={remoteMonitoringEnabled}
+            onRemoteMonitoringEnabledChange={handleRemoteMonitoringToggle}
+            remoteRelayUrl={remoteRelayUrl}
+            onRemoteRelayUrlChange={setRemoteRelayUrl}
+            remoteDeviceId={remoteDeviceId}
+            remoteStreamStatus={remoteStreamStatus}
+            onStartStreaming={handleStartStreaming}
+            onStopStreaming={handleStopStreaming}
           />
         );
       

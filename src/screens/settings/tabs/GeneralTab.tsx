@@ -66,6 +66,11 @@ interface GeneralTabProps {
   onPinMaxAttemptsBlur: () => void;
   pinMode: 'numeric' | 'alphanumeric';
   onPinModeChange: (mode: 'numeric' | 'alphanumeric') => void;
+
+  // Location PIN
+  locationPin: string;
+  onLocationPinChange: (pin: string) => void;
+  isLocationPinConfigured: boolean;
   
   // Dashboard mode (webview only)
   dashboardModeEnabled: boolean;
@@ -186,6 +191,9 @@ const GeneralTab: React.FC<GeneralTabProps> = ({
   onPinMaxAttemptsBlur,
   pinMode,
   onPinModeChange,
+  locationPin,
+  onLocationPinChange,
+  isLocationPinConfigured,
   dashboardModeEnabled,
   onDashboardModeEnabledChange,
   autoReload,
@@ -856,6 +864,22 @@ const GeneralTab: React.FC<GeneralTabProps> = ({
         </View>
       </SettingsSection>
       
+      {/* Location Password */}
+      <SettingsSection title="Location Password" icon="map-marker-key">
+        <SettingsInput
+          label=""
+          value={locationPin}
+          onChangeText={onLocationPinChange}
+          placeholder={isLocationPinConfigured ? '••••' : 'Set location PIN (min 4 digits)'}
+          keyboardType="numeric"
+          secureTextEntry
+          maxLength={6}
+          hint={isLocationPinConfigured
+            ? '✓ Location PIN set — Leave empty to keep current. Grants access to Wi-Fi, brightness, and restart.'
+            : 'Optional PIN for location owners. Gives access to Wi-Fi settings, screen brightness, and device restart only.'}
+        />
+      </SettingsSection>
+
       {/* Inactivity Return to Home - WebView only */}
       {displayMode === 'webview' && (
         <SettingsSection title="Inactivity Return" icon="timer-sand">

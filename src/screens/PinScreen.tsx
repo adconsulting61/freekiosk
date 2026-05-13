@@ -4,7 +4,7 @@ import PinInput from '../components/PinInput';
 import { StorageService } from '../utils/storage';
 import { migrateOldPin, hasSecurePin } from '../utils/secureStorage';
 import AppLauncherModule from '../utils/AppLauncherModule';
-import { grantSettingsAccess } from '../utils/authState';
+import { grantSettingsAccess, grantLocationAccess } from '../utils/authState';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 
@@ -69,6 +69,16 @@ const PinScreen: React.FC<PinScreenProps> = ({ navigation }) => {
     }
   };
 
+  const handleSuccessWithRole = (role: 'admin' | 'location'): void => {
+    if (role === 'location') {
+      grantLocationAccess();
+      navigation.navigate('LocationSettings');
+    } else {
+      grantSettingsAccess();
+      navigation.navigate('Settings');
+    }
+  };
+
   const handleSuccess = (): void => {
     grantSettingsAccess();
     navigation.navigate('Settings');
@@ -119,7 +129,7 @@ const PinScreen: React.FC<PinScreenProps> = ({ navigation }) => {
         <Text style={styles.backButtonText}>↩️ Back to Kiosk</Text>
       </TouchableOpacity>
 
-      <PinInput onSuccess={handleSuccess} storedPin={storedPin} />
+      <PinInput onSuccess={handleSuccess} storedPin={storedPin} onSuccessWithRole={handleSuccessWithRole} />
     </View>
   );
 };

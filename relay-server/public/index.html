@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FreeKiosk Remote Monitor</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+  }
+
+  header {
+    background: #1a1d2e;
+    border-bottom: 1px solid #2d3148;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+  header span { font-size: 13px; color: #64748b; }
+
+  .layout { display: flex; height: calc(100vh - 53px); }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 260px;
+    background: #1a1d2e;
+    border-right: 1px solid #2d3148;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  .sidebar-header {
+    padding: 16px;
+    border-bottom: 1px solid #2d3148;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .sidebar-header h2 { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: .05em; }
+  #refresh-btn {
+    background: none;
+    border: 1px solid #2d3148;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+  #refresh-btn:hover { background: #2d3148; color: #e2e8f0; }
+
+  #device-list { flex: 1; overflow-y: auto; padding: 8px; }
+  .device-card {
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    margin-bottom: 4px;
+    transition: background .15s;
+  }
+  .device-card:hover { background: #252840; }
+  .device-card.active { background: #252840; border-color: #4361ee; }
+  .device-card .device-id { font-size: 13px; font-weight: 600; font-family: monospace; color: #e2e8f0; }
+  .device-card .device-meta { font-size: 11px; color: #64748b; margin-top: 3px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #22c55e; margin-right: 5px; }
+  .dot.offline { background: #ef4444; }
+  .empty-state { padding: 24px 16px; text-align: center; color: #475569; font-size: 13px; }
+
+  /* ── Main ── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .toolbar {
+    padding: 12px 16px;
+    border-bottom: 1px solid #2d3148;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #1a1d2e;
+  }
+  .toolbar .device-label { font-size: 14px; font-weight: 600; font-family: monospace; }
+  .status-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    background: #374151;
+    color: #9ca3af;
+  }
+  .status-badge.live { background: #14532d; color: #4ade80; }
+  .status-badge.offline { background: #7f1d1d; color: #fca5a5; }
+
+  #stop-btn, #snapshot-btn {
+    margin-left: auto;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #stop-btn { background: #dc2626; color: #fff; }
+  #stop-btn:hover { background: #b91c1c; }
+  #snapshot-btn { background: #2563eb; color: #fff; margin-left: 8px; }
+  #snapshot-btn:hover { background: #1d4ed8; }
+
+  .canvas-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #070810;
+    overflow: hidden;
+    position: relative;
+  }
+
+  #stream-canvas {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: none;
+    border-radius: 4px;
+  }
+
+  .placeholder {
+    text-align: center;
+    color: #475569;
+  }
+  .placeholder svg { opacity: .3; margin-bottom: 12px; }
+  .placeholder p { font-size: 14px; }
+  .placeholder small { font-size: 12px; color: #334155; }
+
+  #fps-counter {
+    position: absolute;
+    bottom: 10px;
+    right: 14px;
+    font-size: 11px;
+    color: #4ade80;
+    font-family: monospace;
+    background: rgba(0,0,0,.6);
+    padding: 2px 7px;
+    border-radius: 4px;
+    display: none;
+  }
+
+  /* ── Settings panel ── */
+  .settings-row {
+    padding: 8px 16px;
+    border-top: 1px solid #2d3148;
+    background: #1a1d2e;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .settings-row label { font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 6px; }
+  .settings-row input[type=text] {
+    background: #0f1117;
+    border: 1px solid #2d3148;
+    color: #e2e8f0;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    width: 260px;
+  }
+  #connect-btn {
+    padding: 6px 16px;
+    background: #4361ee;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #connect-btn:hover { background: #3451d1; }
+</style>
+</head>
+<body>
+
+<header>
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4361ee" stroke-width="2">
+    <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+  </svg>
+  <h1>FreeKiosk Remote Monitor</h1>
+  <span id="server-url"></span>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>Devices</h2>
+      <button id="refresh-btn" onclick="loadDevices()">↻ Refresh</button>
+    </div>
+    <div id="device-list">
+      <div class="empty-state">No devices connected</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="toolbar">
+      <span class="device-label" id="active-device">Select a device</span>
+      <span class="status-badge" id="stream-status">idle</span>
+      <button id="snapshot-btn" style="display:none" onclick="takeSnapshot()">📷 Snapshot</button>
+      <button id="stop-btn" style="display:none" onclick="stopViewing()">■ Stop</button>
+    </div>
+
+    <div class="canvas-wrap">
+      <div class="placeholder" id="placeholder">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+        </svg>
+        <p>Select a device from the sidebar</p>
+        <small>Live JPEG stream at 2 fps</small>
+      </div>
+      <canvas id="stream-canvas"></canvas>
+      <div id="fps-counter">0 fps</div>
+    </div>
+
+    <div class="settings-row">
+      <label>
+        Relay server
+        <input type="text" id="relay-url" placeholder="ws://your-server:3000" />
+      </label>
+      <label>
+        Secret
+        <input type="text" id="relay-secret" placeholder="(optional)" style="width:120px"/>
+      </label>
+      <button id="connect-btn" onclick="saveConfig()">Save</button>
+    </div>
+  </main>
+</div>
+
+<script>
+// ── Config ───────────────────────────────────────────────────────────────
+const LS_RELAY = 'fk_relay_url';
+const LS_SECRET = 'fk_relay_secret';
+
+let relayUrl = localStorage.getItem(LS_RELAY) || location.origin.replace(/^http/, 'ws');
+let relaySecret = localStorage.getItem(LS_SECRET) || '';
+let activeDeviceId = null;
+let viewerWs = null;
+let frameCount = 0;
+let lastFpsCheck = Date.now();
+
+document.getElementById('relay-url').value = relayUrl;
+document.getElementById('relay-secret').value = relaySecret;
+document.getElementById('server-url').textContent = relayUrl;
+
+function saveConfig() {
+  relayUrl = document.getElementById('relay-url').value.trim();
+  relaySecret = document.getElementById('relay-secret').value.trim();
+  localStorage.setItem(LS_RELAY, relayUrl);
+  localStorage.setItem(LS_SECRET, relaySecret);
+  document.getElementById('server-url').textContent = relayUrl;
+  loadDevices();
+}
+
+// ── Device list ───────────────────────────────────────────────────────────
+async function loadDevices() {
+  const httpUrl = relayUrl.replace(/^ws/, 'http');
+  try {
+    const res = await fetch(`${httpUrl}/api/devices`);
+    const devices = await res.json();
+    renderDeviceList(devices);
+  } catch {
+    document.getElementById('device-list').innerHTML =
+      '<div class="empty-state">Could not reach relay server</div>';
+  }
+}
+
+function renderDeviceList(devices) {
+  const el = document.getElementById('device-list');
+  if (!devices.length) {
+    el.innerHTML = '<div class="empty-state">No devices connected</div>';
+    return;
+  }
+  el.innerHTML = devices.map(d => `
+    <div class="device-card ${d.deviceId === activeDeviceId ? 'active' : ''}"
+         onclick="viewDevice('${d.deviceId}')">
+      <div class="device-id">
+        <span class="dot ${d.connected ? '' : 'offline'}"></span>${d.deviceId}
+      </div>
+      <div class="device-meta">${d.viewers} viewer${d.viewers !== 1 ? 's' : ''} · ${d.connected ? 'online' : 'offline'}</div>
+    </div>
+  `).join('');
+}
+
+// ── Viewer WebSocket ──────────────────────────────────────────────────────
+const canvas = document.getElementById('stream-canvas');
+const ctx = canvas.getContext('2d');
+
+function viewDevice(deviceId) {
+  stopViewing();
+  activeDeviceId = deviceId;
+  document.getElementById('active-device').textContent = deviceId;
+  setStatus('connecting');
+
+  const sep = relayUrl.includes('?') ? '&' : '?';
+  const url = `${relayUrl}/ws?role=admin&deviceId=${deviceId}${relaySecret ? sep + 'secret=' + relaySecret : ''}`;
+
+  viewerWs = new WebSocket(url);
+  viewerWs.binaryType = 'arraybuffer';
+
+  viewerWs.onopen = () => {
+    setStatus('live');
+    document.getElementById('stop-btn').style.display = '';
+    document.getElementById('snapshot-btn').style.display = '';
+    document.getElementById('fps-counter').style.display = '';
+    document.getElementById('placeholder').style.display = 'none';
+    canvas.style.display = '';
+    loadDevices(); // refresh viewer count
+  };
+
+  viewerWs.onmessage = (event) => {
+    if (typeof event.data === 'string') {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'tablet_offline') setStatus('offline');
+      } catch {}
+      return;
+    }
+    // Binary = JPEG frame
+    const blob = new Blob([event.data], { type: 'image/jpeg' });
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      ctx.drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+      frameCount++;
+    };
+    img.src = url;
+  };
+
+  viewerWs.onerror = () => setStatus('error');
+  viewerWs.onclose = () => {
+    if (activeDeviceId === deviceId) setStatus('disconnected');
+  };
+}
+
+function stopViewing() {
+  if (viewerWs) {
+    viewerWs.close();
+    viewerWs = null;
+  }
+  activeDeviceId = null;
+  canvas.style.display = 'none';
+  document.getElementById('placeholder').style.display = '';
+  document.getElementById('stop-btn').style.display = 'none';
+  document.getElementById('snapshot-btn').style.display = 'none';
+  document.getElementById('fps-counter').style.display = 'none';
+  document.getElementById('active-device').textContent = 'Select a device';
+  setStatus('idle');
+}
+
+function setStatus(s) {
+  const el = document.getElementById('stream-status');
+  el.textContent = s;
+  el.className = 'status-badge' + (s === 'live' ? ' live' : s === 'offline' || s === 'error' ? ' offline' : '');
+}
+
+function takeSnapshot() {
+  const a = document.createElement('a');
+  a.download = `snapshot-${activeDeviceId}-${Date.now()}.jpg`;
+  a.href = canvas.toDataURL('image/jpeg', 0.95);
+  a.click();
+}
+
+// ── FPS counter ───────────────────────────────────────────────────────────
+setInterval(() => {
+  const now = Date.now();
+  const elapsed = (now - lastFpsCheck) / 1000;
+  const fps = (frameCount / elapsed).toFixed(1);
+  document.getElementById('fps-counter').textContent = `${fps} fps`;
+  frameCount = 0;
+  lastFpsCheck = now;
+}, 2000);
+
+// ── Auto-refresh device list every 10s ───────────────────────────────────
+loadDevices();
+setInterval(loadDevices, 10000);
+</script>
+</body>
+</html>

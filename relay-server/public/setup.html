@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FreeKiosk Remote Monitoring — Setup Guide</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; line-height: 1.6; }
+  .hero { background: linear-gradient(135deg, #1a1d2e, #252840); padding: 40px 24px; text-align: center; border-bottom: 1px solid #2d3148; }
+  .hero h1 { font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+  .hero p { color: #94a3b8; font-size: 15px; }
+  .badge { display: inline-block; background: #14532d; color: #4ade80; font-size: 12px; padding: 3px 10px; border-radius: 20px; font-weight: 600; margin-top: 10px; }
+  .container { max-width: 860px; margin: 0 auto; padding: 32px 24px; }
+  h2 { font-size: 18px; font-weight: 700; color: #fff; margin: 32px 0 12px; display: flex; align-items: center; gap: 10px; }
+  h2 .num { background: #4361ee; color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  p, li { color: #94a3b8; font-size: 14px; margin-bottom: 8px; }
+  ul, ol { padding-left: 20px; }
+  li { margin-bottom: 6px; }
+  .card { background: #1a1d2e; border: 1px solid #2d3148; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .card h3 { font-size: 14px; font-weight: 700; color: #e2e8f0; margin-bottom: 8px; }
+  code { background: #0f1117; border: 1px solid #2d3148; color: #4ade80; font-family: monospace; font-size: 13px; padding: 2px 7px; border-radius: 4px; }
+  pre { background: #0f1117; border: 1px solid #2d3148; border-radius: 8px; padding: 16px; overflow-x: auto; margin: 12px 0; }
+  pre code { background: none; border: none; padding: 0; color: #e2e8f0; }
+  .highlight { color: #f59e0b; }
+  .ok { color: #4ade80; }
+  .tab-row { display: flex; gap: 8px; margin-bottom: 0; border-bottom: 1px solid #2d3148; }
+  .tab { padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 8px 8px 0 0; color: #64748b; background: none; border: none; }
+  .tab.active { background: #1a1d2e; color: #e2e8f0; border: 1px solid #2d3148; border-bottom: 1px solid #1a1d2e; margin-bottom: -1px; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .warning { background: #431407; border: 1px solid #9a3412; border-radius: 8px; padding: 12px 16px; color: #fdba74; font-size: 13px; margin: 12px 0; }
+  .info { background: #0c1445; border: 1px solid #1e3a8a; border-radius: 8px; padding: 12px 16px; color: #93c5fd; font-size: 13px; margin: 12px 0; }
+  a { color: #4361ee; }
+  #server-info { background: #0c1445; border: 1px solid #1e3a8a; border-radius: 12px; padding: 20px; margin: 20px 0; }
+  #server-info h3 { color: #93c5fd; font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #1e3a8a; font-size: 13px; }
+  .info-row:last-child { border-bottom: none; }
+  .info-label { color: #64748b; }
+  .info-value { font-family: monospace; color: #e2e8f0; }
+  .copy-btn { background: #1e3a8a; border: none; color: #93c5fd; padding: 3px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 8px; }
+  .copy-btn:hover { background: #2d4fa8; }
+  footer { text-align: center; padding: 32px 24px; color: #334155; font-size: 12px; border-top: 1px solid #1a1d2e; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>FreeKiosk Remote Monitoring</h1>
+  <p>Relay server is running. Follow the steps below to connect your tablets.</p>
+  <span class="badge ok">● Server Online</span>
+</div>
+
+<div class="container">
+
+  <!-- Auto-detected server info -->
+  <div id="server-info">
+    <h3>Your Server Details</h3>
+    <div class="info-row">
+      <span class="info-label">WebSocket URL (use in kiosk app)</span>
+      <span class="info-value" id="ws-url">—</span>
+      <button class="copy-btn" onclick="copyText('ws-url')">Copy</button>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Admin Dashboard</span>
+      <span class="info-value"><a id="dashboard-link" href="/">Open Dashboard</a></span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Secret Key</span>
+      <span class="info-value" id="secret-display">Set via STREAM_SECRET env variable</span>
+    </div>
+  </div>
+
+  <!-- Step 1 -->
+  <h2><span class="num">1</span> Deploy this server (if not already done)</h2>
+
+  <div class="tab-row" id="deploy-tabs">
+    <button class="tab active" onclick="showTab('railway')">Railway (free)</button>
+    <button class="tab" onclick="showTab('render')">Render (free)</button>
+    <button class="tab" onclick="showTab('windows')">Windows PC</button>
+    <button class="tab" onclick="showTab('linux')">Linux/Mac</button>
+  </div>
+
+  <div class="card" style="border-radius:0 12px 12px 12px">
+    <div class="tab-content active" id="tab-railway">
+      <h3>Deploy on Railway — Free 500 hrs/month</h3>
+      <ol>
+        <li>Create a free account at <a href="https://railway.app" target="_blank">railway.app</a></li>
+        <li>Create a new GitHub repository and push the <code>relay-server/</code> folder into it</li>
+        <li>In Railway: click <strong>New Project → Deploy from GitHub repo</strong></li>
+        <li>Select your repo. Railway auto-detects Node.js and deploys.</li>
+        <li>Go to your project → <strong>Variables</strong> → add <code>STREAM_SECRET</code> = any random string you choose</li>
+        <li>Go to <strong>Settings → Networking → Generate Domain</strong> — copy the URL (e.g. <code>freekiosk-relay.up.railway.app</code>)</li>
+        <li>Your WebSocket URL: <code>wss://freekiosk-relay.up.railway.app</code></li>
+      </ol>
+      <div class="info">When Railway free hours run out, stop the Railway project and switch to the Windows PC option below. Your settings stay saved in the kiosk app — just update the relay URL.</div>
+    </div>
+
+    <div class="tab-content" id="tab-render">
+      <h3>Deploy on Render — Free Tier</h3>
+      <ol>
+        <li>Create a free account at <a href="https://render.com" target="_blank">render.com</a></li>
+        <li>Push the <code>relay-server/</code> folder to a GitHub repo</li>
+        <li>In Render: <strong>New → Web Service → Connect GitHub repo</strong></li>
+        <li>Build command: <code>npm install</code> &nbsp; Start command: <code>node server.js</code></li>
+        <li>Add environment variable: <code>STREAM_SECRET</code> = your chosen secret</li>
+        <li>Click <strong>Deploy</strong>. Your URL will be <code>wss://your-app.onrender.com</code></li>
+      </ol>
+      <div class="warning">Render free tier spins down after 15 min of inactivity. First connection after sleep takes ~30 seconds.</div>
+    </div>
+
+    <div class="tab-content" id="tab-windows">
+      <h3>Run on Windows PC (always-on)</h3>
+      <ol>
+        <li>Copy the <code>relay-server</code> folder to your PC</li>
+        <li>Right-click <code>install-windows.ps1</code> → <strong>Run with PowerShell as Administrator</strong></li>
+        <li>The installer will: install Node.js, set up the server, open firewall port 3000, and start it automatically on reboot</li>
+        <li>Note the <span class="highlight">secret key</span> printed at the end</li>
+        <li>For internet access: log into your router and set up <strong>port forwarding</strong>: external port 3000 → your PC's local IP on port 3000</li>
+        <li>Find your public IP at <a href="https://whatismyip.com" target="_blank">whatismyip.com</a></li>
+        <li>Relay URL: <code>ws://YOUR-PUBLIC-IP:3000</code></li>
+      </ol>
+      <div class="info">For a stable URL even if your home IP changes, use a free dynamic DNS service like <a href="https://www.duckdns.org" target="_blank">DuckDNS</a>. Then your URL stays the same like <code>ws://yourname.duckdns.org:3000</code></div>
+    </div>
+
+    <div class="tab-content" id="tab-linux">
+      <h3>Run on Linux VPS or Mac</h3>
+      <pre><code># Copy relay-server folder to your server, then:
+bash install-linux.sh</code></pre>
+      <p>The script installs Node.js, sets up the server as a background service with pm2, and opens port 3000.</p>
+      <pre><code># Check status
+pm2 status
+
+# View live logs
+pm2 logs freekiosk-relay</code></pre>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <h2><span class="num">2</span> Configure the kiosk app</h2>
+  <div class="card">
+    <h3>In the FreeKiosk Android app:</h3>
+    <ol>
+      <li>Enter your admin PIN to open Settings</li>
+      <li>Go to the <strong>Advanced</strong> tab</li>
+      <li>Scroll to <strong>Remote Monitoring</strong></li>
+      <li>Toggle <strong>Enable Remote Screen Monitoring</strong> ON</li>
+      <li>Enter your <strong>Relay Server URL</strong> (the <code>ws://</code> or <code>wss://</code> address from Step 1)</li>
+      <li>Tap <strong>Start Streaming</strong></li>
+      <li>Android will show a <em>"Start recording?"</em> dialog — tap <strong>Start now</strong></li>
+      <li>The tablet is now streaming</li>
+    </ol>
+    <div class="warning">The screen capture consent dialog appears once per session. After a reboot, you need to tap "Start Streaming" again (or it can auto-start — coming in a future update).</div>
+  </div>
+
+  <!-- Step 3 -->
+  <h2><span class="num">3</span> Watch from the admin dashboard</h2>
+  <div class="card">
+    <h3>Open the dashboard</h3>
+    <ol>
+      <li>Open <a href="/">the dashboard</a> in any browser</li>
+      <li>Enter your relay server URL in the bottom bar (pre-filled if you're already on the server)</li>
+      <li>Enter your secret key</li>
+      <li>Click <strong>Save</strong></li>
+      <li>Your tablet appears in the left sidebar — click it to start watching</li>
+      <li>Use the <strong>📷 Snapshot</strong> button to save a screenshot</li>
+    </ol>
+    <div class="info">Stream runs at ~2 frames per second by default — enough for monitoring. The frame rate is configurable in the kiosk app settings.</div>
+  </div>
+
+  <!-- Step 4: switching from Railway to PC -->
+  <h2><span class="num">4</span> Switching from Railway to your PC mid-month</h2>
+  <div class="card">
+    <ol>
+      <li>Run <code>install-windows.ps1</code> on your PC (Step 1, Windows tab)</li>
+      <li>Get your new relay URL (<code>ws://YOUR-PUBLIC-IP:3000</code>)</li>
+      <li>In the kiosk app: Settings → Advanced → Remote Monitoring → update the URL</li>
+      <li>Tap <strong>Stop Streaming</strong>, then <strong>Start Streaming</strong> again</li>
+      <li>In Railway: pause or delete the project to stop counting hours</li>
+    </ol>
+    <div class="info">The kiosk's device ID stays the same — your admin dashboard will reconnect automatically once you update the relay URL.</div>
+  </div>
+
+</div>
+
+<footer>FreeKiosk Remote Monitoring · Relay server running</footer>
+
+<script>
+// Auto-fill server URL
+const wsProto = location.protocol === 'https:' ? 'wss' : 'ws';
+const wsUrl = `${wsProto}://${location.host}`;
+document.getElementById('ws-url').textContent = wsUrl;
+document.getElementById('dashboard-link').href = '/';
+
+function showTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function copyText(id) {
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+</script>
+</body>
+</html>

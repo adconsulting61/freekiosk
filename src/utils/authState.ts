@@ -14,6 +14,7 @@
 const AUTH_EXPIRY_MS = 60_000; // 60 seconds — generous window for Settings to mount
 
 let _pinVerifiedAt: number | null = null;
+let _locationVerifiedAt: number | null = null;
 
 /** Call after PIN is successfully verified (PinScreen → Settings). */
 export function grantSettingsAccess(): void {
@@ -45,4 +46,20 @@ export function consumeSettingsAccess(): boolean {
   // Don't revoke here — let Settings remain accessible while user is on the screen.
   // Revocation happens explicitly when navigating away.
   return valid;
+}
+
+/** Call after location PIN is verified (PinScreen → LocationSettings). */
+export function grantLocationAccess(): void {
+  _locationVerifiedAt = Date.now();
+}
+
+/** Call when leaving LocationSettings. */
+export function revokeLocationAccess(): void {
+  _locationVerifiedAt = null;
+}
+
+/** Returns `true` if location PIN was verified recently. */
+export function hasLocationAccess(): boolean {
+  if (_locationVerifiedAt === null) return false;
+  return Date.now() - _locationVerifiedAt < AUTH_EXPIRY_MS;
 }
