@@ -1013,6 +1013,11 @@ class MainActivity : ReactActivity() {
       editor.putString("@kiosk_pin", pin)
     }
 
+    intent.getStringExtra("operator_pin")?.let {
+      editor.putString("@kiosk_operator_pin", it)
+      android.util.Log.i("FreeKiosk-ADB", "Operator PIN saved to pending config")
+    }
+
     if (lockPackage != null) {
       // Verify package exists
       try {

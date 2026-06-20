@@ -7,6 +7,7 @@ import PinScreen from '../screens/PinScreen';
 import { SettingsScreen } from '../screens/settings';
 import BlockingOverlaysScreen from '../screens/settings/BlockingOverlaysScreen';
 import LocationSettingsScreen from '../screens/LocationSettingsScreen';
+import OperatorSettingsScreen from '../screens/OperatorSettingsScreen';
 
 export type RootStackParamList = {
   Kiosk: undefined;
@@ -14,6 +15,7 @@ export type RootStackParamList = {
   Settings: undefined;
   BlockingOverlays: undefined;
   LocationSettings: undefined;
+  OperatorSettings: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -60,6 +62,14 @@ const AppNavigator: React.FC = () => {
         <Stack.Screen
           name="LocationSettings"
           component={LocationSettingsScreen}
+          options={{
+            headerShown: false,
+            gestureEnabled: false,
+          }}
+        />
+        <Stack.Screen
+          name="OperatorSettings"
+          component={OperatorSettingsScreen}
           options={{
             headerShown: false,
             gestureEnabled: false,

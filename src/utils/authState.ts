@@ -13,17 +13,28 @@
 
 const AUTH_EXPIRY_MS = 60_000; // 60 seconds — generous window for Settings to mount
 
+export type AccessLevel = 'admin' | 'operator' | 'location';
+
 let _pinVerifiedAt: number | null = null;
 let _locationVerifiedAt: number | null = null;
+let _accessLevel: AccessLevel | null = null;
 
 /** Call after PIN is successfully verified (PinScreen → Settings). */
-export function grantSettingsAccess(): void {
+export function grantSettingsAccess(level: AccessLevel = 'admin'): void {
   _pinVerifiedAt = Date.now();
+  _accessLevel = level;
 }
 
 /** Call when leaving Settings (save, reset, back-to-kiosk, etc.). */
 export function revokeSettingsAccess(): void {
   _pinVerifiedAt = null;
+  _accessLevel = null;
+}
+
+/** Returns the current access level if the session is still valid, else null. */
+export function getAccessLevel(): AccessLevel | null {
+  if (!hasSettingsAccess()) return null;
+  return _accessLevel;
 }
 
 /**

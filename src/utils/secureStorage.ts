@@ -548,13 +548,13 @@ export async function clearSecureLocationPin(): Promise<void> {
 }
 
 /**
- * Verify inputPin against admin PIN first, then location PIN.
+ * Verify inputPin against admin PIN, then operator PIN, then location PIN.
  * Uses shared attempt/lockout counter.
- * Returns role: 'admin' | 'location' on success.
+ * Returns role: 'admin' | 'operator' | 'location' on success.
  */
 export async function verifyAnyPin(inputPin: string): Promise<{
   success: boolean;
-  role?: 'admin' | 'location';
+  role?: 'admin' | 'operator' | 'location';
   attemptsRemaining?: number;
   lockoutTimeRemaining?: number;
   message?: string;
@@ -586,6 +586,13 @@ export async function verifyAnyPin(inputPin: string): Promise<{
       }
     }
 
+    // Try operator PIN
+    const isOperator = await checkPinHash(inputPin, OPERATOR_PIN_SERVICE);
+    if (isOperator) {
+      await resetPinAttempts();
+      return { success: true, role: 'operator' };
+    }
+
     // Try location PIN
     const isLocation = await checkPinHash(inputPin, LOCATION_PIN_SERVICE);
     if (isLocation) {
@@ -593,7 +600,7 @@ export async function verifyAnyPin(inputPin: string): Promise<{
       return { success: true, role: 'location' };
     }
 
-    // Neither matched
+    // None matched
     await recordFailedAttempt();
     const maxAttempts = await getMaxAttempts();
     const attempts = await getPinAttempts();
@@ -640,6 +647,150 @@ async function clearLegacyPlaintextPin(): Promise<void> {
     await AsyncStorage.removeItem('@kiosk_pin');
   } catch (error) {
     console.error('[SecureStorage] Error clearing legacy PIN:', error);
+  }
+}
+
+// ============================================
+// OPERATOR PIN SECURE STORAGE
+// ============================================
+
+const OPERATOR_PIN_SERVICE = 'coreiq_kiosk_operator_pin';
+
+/**
+ * Save operator PIN with PBKDF2 hashing (same pattern as admin PIN)
+ */
+export async function saveSecureOperatorPin(pin: string): Promise<boolean> {
+  try {
+    const salt = generateSalt();
+    const hashedPin = await hashPin(pin, salt);
+
+    await Keychain.setGenericPassword(
+      'operator_pin',
+      JSON.stringify({
+        hash: hashedPin,
+        salt: bytesToHex(salt)
+      }),
+      {
+        service: OPERATOR_PIN_SERVICE,
+        accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED,
+      }
+    );
+
+    return true;
+  } catch (error) {
+    console.error('[SecureStorage] Error saving operator PIN:', error);
+    return false;
+  }
+}
+
+/**
+ * Check if an operator PIN is set
+ */
+export async function hasSecureOperatorPin(): Promise<boolean> {
+  try {
+    const credentials = await Keychain.getGenericPassword({ service: OPERATOR_PIN_SERVICE });
+    return !!credentials;
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
+ * Clear operator PIN from secure storage
+ */
+export async function clearSecureOperatorPin(): Promise<void> {
+  try {
+    await Keychain.resetGenericPassword({ service: OPERATOR_PIN_SERVICE });
+  } catch (error) {
+    console.error('[SecureStorage] Error clearing operator PIN:', error);
+  }
+}
+
+/**
+ * Verify input against either admin or operator PIN.
+ * Shares the same lockout counter as the admin PIN.
+ * Returns { success, level } where level is 'admin' | 'operator'.
+ */
+export async function verifyEitherPin(inputPin: string): Promise<{
+  success: boolean;
+  level?: 'admin' | 'operator';
+  attemptsRemaining?: number;
+  lockoutTimeRemaining?: number;
+  message?: string;
+}> {
+  try {
+    // Check shared lockout
+    const lockoutStatus = await checkLockout();
+    if (lockoutStatus.isLockedOut) {
+      return {
+        success: false,
+        lockoutTimeRemaining: lockoutStatus.timeRemaining ?? undefined,
+        message: `Too many failed attempts. Try again in ${Math.ceil((lockoutStatus.timeRemaining || 0) / 60000)} minutes.`,
+      };
+    }
+
+    // --- Try admin PIN ---
+    const adminCredentials = await Keychain.getGenericPassword({ service: PIN_SERVICE });
+    if (adminCredentials) {
+      const adminData = JSON.parse(adminCredentials.password);
+      const adminSalt = hexToBytes(adminData.salt);
+      const adminInputHash = await hashPin(inputPin, adminSalt);
+      if (adminInputHash === adminData.hash) {
+        await resetPinAttempts();
+        return { success: true, level: 'admin' };
+      }
+    } else {
+      // No admin PIN in Keystore — fall back to legacy plaintext / default
+      const legacyPin = await checkLegacyPlaintextPin();
+      if (legacyPin) {
+        if (inputPin === legacyPin) {
+          await saveSecurePin(inputPin);
+          await clearLegacyPlaintextPin();
+          await resetPinAttempts();
+          return { success: true, level: 'admin' };
+        }
+      } else if (inputPin === '1234') {
+        await resetPinAttempts();
+        return { success: true, level: 'admin' };
+      }
+    }
+
+    // --- Try operator PIN ---
+    const operatorCredentials = await Keychain.getGenericPassword({ service: OPERATOR_PIN_SERVICE });
+    if (operatorCredentials) {
+      const operatorData = JSON.parse(operatorCredentials.password);
+      const operatorSalt = hexToBytes(operatorData.salt);
+      const operatorInputHash = await hashPin(inputPin, operatorSalt);
+      if (operatorInputHash === operatorData.hash) {
+        await resetPinAttempts();
+        return { success: true, level: 'operator' };
+      }
+    }
+
+    // --- Both failed ---
+    await recordFailedAttempt();
+    const maxAttempts = await getMaxAttempts();
+    const attempts = await getPinAttempts();
+
+    if (attempts.count >= maxAttempts) {
+      return {
+        success: false,
+        lockoutTimeRemaining: LOCKOUT_DURATION,
+        message: `Too many failed attempts. Locked for 15 minutes.`,
+      };
+    }
+
+    return {
+      success: false,
+      attemptsRemaining: maxAttempts - attempts.count,
+      message: 'Incorrect PIN',
+    };
+  } catch (error) {
+    console.error('[SecureStorage] Error in verifyEitherPin:', error);
+    return {
+      success: false,
+      message: 'Error verifying PIN',
+    };
   }
 }
 

@@ -69,19 +69,18 @@ const PinScreen: React.FC<PinScreenProps> = ({ navigation }) => {
     }
   };
 
-  const handleSuccessWithRole = (role: 'admin' | 'location'): void => {
+  const handleSuccess = (role: 'admin' | 'operator' | 'location'): void => {
     if (role === 'location') {
       grantLocationAccess();
       navigation.navigate('LocationSettings');
     } else {
-      grantSettingsAccess();
-      navigation.navigate('Settings');
+      grantSettingsAccess(role);
+      if (role === 'operator') {
+        navigation.navigate('OperatorSettings');
+      } else {
+        navigation.navigate('Settings');
+      }
     }
-  };
-
-  const handleSuccess = (): void => {
-    grantSettingsAccess();
-    navigation.navigate('Settings');
   };
 
   const handleBack = async (): Promise<void> => {
@@ -129,7 +128,7 @@ const PinScreen: React.FC<PinScreenProps> = ({ navigation }) => {
         <Text style={styles.backButtonText}>↩️ Back to Kiosk</Text>
       </TouchableOpacity>
 
-      <PinInput onSuccess={handleSuccess} storedPin={storedPin} onSuccessWithRole={handleSuccessWithRole} />
+      <PinInput onSuccess={handleSuccess} storedPin={storedPin} />
     </View>
   );
 };

@@ -10,7 +10,7 @@ import StatusBar from '../components/StatusBar';
 import MotionDetector from '../components/MotionDetector';
 import ExternalAppOverlay from '../components/ExternalAppOverlay';
 import { StorageService } from '../utils/storage';
-import { saveSecurePin, saveSecureMqttPassword, getSecureBasicAuthPassword } from '../utils/secureStorage';
+import { saveSecurePin, saveSecureMqttPassword, getSecureBasicAuthPassword, saveSecureOperatorPin } from '../utils/secureStorage';
 import KioskModule from '../utils/KioskModule';
 import AppLauncherModule from '../utils/AppLauncherModule';
 import OverlayServiceModule from '../utils/OverlayServiceModule';
@@ -1349,6 +1349,9 @@ const KioskScreen: React.FC<KioskScreenProps> = ({ navigation }) => {
                 // PIN must be saved to Keystore (not just AsyncStorage)
                 await saveSecurePin(value);
                 console.log('[KioskScreen] PIN saved to secure Keystore via pending ADB config');
+              } else if (key === '@kiosk_operator_pin') {
+                await saveSecureOperatorPin(value);
+                console.log('[KioskScreen] Operator PIN saved to secure Keystore via pending ADB config');
               } else if (key === '@mqtt_password_pending') {
                 // MQTT password must be saved to Keychain (not AsyncStorage)
                 await saveSecureMqttPassword(value);

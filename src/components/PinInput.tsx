@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
-import { verifySecurePin, verifyAnyPin, getLockoutStatus, hasSecurePin } from '../utils/secureStorage';
+import { verifyAnyPin, getLockoutStatus, hasSecurePin } from '../utils/secureStorage';
 import { StorageService } from '../utils/storage';
 
 interface PinInputProps {
-  onSuccess: () => void;
+  onSuccess: (role: 'admin' | 'operator' | 'location') => void;
   storedPin: string; // Kept for backward compatibility but not used
-  onSuccessWithRole?: (role: 'admin' | 'location') => void;
 }
 
-const PinInput: React.FC<PinInputProps> = ({ onSuccess, onSuccessWithRole }) => {
+const PinInput: React.FC<PinInputProps> = ({ onSuccess }) => {
   const [pin, setPin] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLockedOut, setIsLockedOut] = useState<boolean>(false);
@@ -75,17 +74,11 @@ const PinInput: React.FC<PinInputProps> = ({ onSuccess, onSuccessWithRole }) => 
     setIsLoading(true);
 
     try {
-      const result = onSuccessWithRole
-        ? await verifyAnyPin(pin)
-        : await verifySecurePin(pin);
+      const result = await verifyAnyPin(pin);
 
       if (result.success) {
         setPin('');
-        if (onSuccessWithRole && 'role' in result && result.role) {
-          onSuccessWithRole(result.role);
-        } else {
-          onSuccess();
-        }
+        onSuccess(result.role ?? 'admin');
       } else {
         setPin('');
 
