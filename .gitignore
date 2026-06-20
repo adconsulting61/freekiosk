@@ -34,7 +34,7 @@ local.properties
 *.keystore
 !debug.keystore
 .kotlin/
-gradle.properties
+# gradle.properties is intentionally tracked (JVM heap / build config)
 
 # node.js
 #
@@ -92,7 +92,6 @@ release-builds/
 *.apk
 *.aab
 !app-release.apk
-android/gradle.properties
 launch.md
 ROADMAP.md
 Features.md
